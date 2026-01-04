@@ -1341,6 +1341,7 @@
                     <span class="cmd-params">-server</span>：启用服务器模式优化<br>
                     <span class="cmd-params">"$@"</span>：传递所有命令行参数给服务端<br>
                     <span class="cmd-params">@libraries/net/minecraftforge/forge/1.17.1-37.1.1/unix_args.txt "$@"</span>：run.sh中复制类似的参数(最前面的java不用复制)
+                </div>
             </div>
         </div>
     </div>
@@ -1357,128 +1358,158 @@
     </div>
 
     <script>
-       // 1. 模块切换功能
-document.addEventListener('DOMContentLoaded', function() {
-    // 获取所有导航按钮和模块容器
-    const navButtons = document.querySelectorAll('.global-nav-btn');
-    const moduleContainers = document.querySelectorAll('.module-container');
-    const backToTopBtn = document.getElementById('backToTop');
-    const globalNav = document.getElementById('globalNav');
-    const copyToast = document.getElementById('copyToast');
-    
-    // 为每个导航按钮添加点击事件
-    navButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // 移除所有按钮的active类
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            // 给当前点击的按钮添加active类
-            this.classList.add('active');
-            
-            // 获取目标模块ID
-            const targetId = this.getAttribute('data-target');
-            
-            // 隐藏所有模块
-            moduleContainers.forEach(container => {
-                container.classList.remove('active');
-            });
-            
-            // 显示目标模块
-            const targetModule = document.getElementById(targetId);
-            if (targetModule) {
-                targetModule.classList.add('active');
+        // 导航栏切换模块
+        const navButtons = document.querySelectorAll('.global-nav-btn');
+        const modules = document.querySelectorAll('.module-container');
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有激活状态
+                navButtons.forEach(b => b.classList.remove('active'));
+                modules.forEach(m => m.classList.remove('active'));
+                
+                // 添加当前激活状态
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+                
                 // 滚动到模块顶部
                 document.getElementById(`${targetId}-top`).scrollIntoView({
                     behavior: 'smooth'
                 });
+            });
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('globalNav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+            
+            // 回到顶部按钮显示/隐藏
+            const backToTop = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
             }
         });
-    });
 
-    // 2. 复制代码功能
-    const copyButtons = document.querySelectorAll('.copy-btn');
-    const cmdCopyButtons = document.querySelectorAll('.cmd-copy-btn');
-    
-    // 通用复制函数
-    function copyToClipboard(text, button) {
-        navigator.clipboard.writeText(text).then(() => {
-            // 显示复制成功提示
-            copyToast.classList.add('show');
-            copyToast.classList.remove('error');
-            copyToast.innerHTML = '<i class="fas fa-check-circle"></i><span>复制成功！</span>';
-            
-            // 按钮状态变化
-            if (button) {
-                button.classList.add('copied');
-                button.innerHTML = '<i class="fas fa-check"></i>已复制';
+        // 回到顶部功能 - 修复版
+        document.getElementById('backToTop').addEventListener('click', () => {
+            // 获取当前激活的模块
+            const activeModule = document.querySelector('.module-container.active');
+            if (activeModule) {
+                // 获取模块顶部的锚点
+                const moduleTopId = activeModule.id + '-top';
+                const moduleTopElement = document.getElementById(moduleTopId);
+                
+                if (moduleTopElement) {
+                    // 滚动到当前模块的顶部
+                    moduleTopElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    // 如果没有找到锚点，则滚动到模块的开始位置
+                    activeModule.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            } else {
+                // 如果没有激活的模块，则滚动到页面顶部
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        });
+
+        // 复制功能
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        const cmdCopyButtons = document.querySelectorAll('.cmd-copy-btn');
+        const copyToast = document.getElementById('copyToast');
+
+        // 通用复制函数
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                // 显示成功提示
+                copyToast.textContent = '';
+                copyToast.innerHTML = '<i class="fas fa-check"></i> 复制成功！';
+                copyToast.classList.remove('error');
+                copyToast.classList.add('show');
+                
+                // 按钮状态变化
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    setTimeout(() => {
+                        if (btn.classList.contains('cmd-copy-btn')) {
+                            btn.innerHTML = '<i class="fas fa-copy"></i>复制指令';
+                        } else {
+                            btn.innerHTML = '<i class="fas fa-copy"></i>复制';
+                        }
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }
+                
+                // 隐藏提示
                 setTimeout(() => {
-                    if (button.classList.contains('cmd-copy-btn')) {
-                        button.classList.remove('copied');
-                        button.innerHTML = '<i class="fas fa-copy"></i>复制指令';
-                    } else {
-                        button.classList.remove('copied');
-                        button.innerHTML = '<i class="fas fa-copy"></i>复制';
-                    }
+                    copyToast.classList.remove('show');
                 }, 2000);
-            }
-            
-            // 3秒后隐藏提示
-            setTimeout(() => {
-                copyToast.classList.remove('show');
-            }, 3000);
-        }).catch(err => {
-            // 复制失败提示
-            copyToast.classList.add('show', 'error');
-            copyToast.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>复制失败！</span>';
-            setTimeout(() => {
-                copyToast.classList.remove('show', 'error');
-            }, 3000);
-            console.error('复制失败:', err);
-        });
-    }
-    
-    // 代码块复制按钮
-    copyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const codeBlock = this.nextElementSibling;
-            const codeText = codeBlock.textContent.trim();
-            copyToClipboard(codeText, this);
-        });
-    });
-    
-    // 指令卡片复制按钮
-    cmdCopyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const command = this.getAttribute('data-command');
-            copyToClipboard(command, this);
-        });
-    });
-
-    // 3. 回到顶部按钮
-    window.addEventListener('scroll', function() {
-        // 滚动超过300px显示回到顶部按钮
-        if (window.scrollY > 300) {
-            backToTopBtn.classList.add('show');
-            globalNav.classList.add('scrolled');
-        } else {
-            backToTopBtn.classList.remove('show');
-            globalNav.classList.remove('scrolled');
+            }).catch(err => {
+                // 复制失败提示
+                copyToast.textContent = '';
+                copyToast.innerHTML = '<i class="fas fa-times"></i> 复制失败！';
+                copyToast.classList.add('error');
+                copyToast.classList.add('show');
+                
+                setTimeout(() => {
+                    copyToast.classList.remove('show');
+                }, 2000);
+                console.error('复制失败:', err);
+            });
         }
-    });
-    
-    backToTopBtn.addEventListener('click', function() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
 
-    // 4. 初始化显示第一个模块
-    if (moduleContainers.length > 0 && !document.querySelector('.module-container.active')) {
-        moduleContainers[0].classList.add('active');
-        navButtons[0].classList.add('active');
-    }
-});
+        // 代码块复制
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const codeBlock = btn.parentElement.querySelector('pre');
+                const text = codeBlock.textContent.trim();
+                copyToClipboard(text, btn);
+            });
+        });
+
+        // 指令卡片复制
+        cmdCopyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const command = btn.getAttribute('data-command');
+                copyToClipboard(command, btn);
+            });
+        });
+
+        // 初始化显示第一个模块
+        document.getElementById('module1').classList.add('active');
+        
+        // 添加页面加载时的滚动修复
+        window.addEventListener('load', () => {
+            // 确保页面加载后导航栏位置正确
+            setTimeout(() => {
+                if (window.location.hash) {
+                    const hash = window.location.hash.substring(1);
+                    const element = document.getElementById(hash);
+                    if (element) {
+                        setTimeout(() => {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    }
+                }
+            }, 100);
+        });
     </script>
 </body>
 </html>
-
