@@ -1205,7 +1205,7 @@
 <span class="sh-comment"># ${openjdk17} -server -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.country=CN -jar [服务端].jar --installServer</span>
 
 <span class="sh-comment"># Forge服务端启动命令</span>
-<span class="sh-comment"># @libraries/net/minecraftforge/forge/1.17.1-37.1.1/unix_args.txt "$@"</span></pre>
+<span class="sh-comment"># ${openjdk17} -Xms1024M -Xmx${SERVER_MEMORY}M -server @libraries/net/minecraftforge/forge/1.17.1-37.1.1/unix_args.txt "$@"</span></pre>
         </div>
 
         <!-- Forge安装核心命令 -->
@@ -1247,7 +1247,7 @@
         <div class="module">
             <div class="code-display start-command">
                 <button class="copy-btn"><i class="fas fa-copy"></i>复制</button>
-                <pre>@libraries/net/minecraftforge/forge/1.17.1-37.1.1/unix_args.txt "$@"</pre>
+                <pre>${openjdk17} -Xms1024M -Xmx${SERVER_MEMORY}M -server @libraries/net/minecraftforge/forge/1.17.1-37.1.1/unix_args.txt "$@"</pre>
             </div>
             <div class="note" style="margin-top: 15px;">
                 <i class="fas fa-info-circle"></i>
